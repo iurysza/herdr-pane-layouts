@@ -1,6 +1,10 @@
-# Herdr Pane Layouts
+<p align="center">
+  <img src="assets/herdr-pane-layouts-banner.png" width="720" alt="Split pane with resize and layout controls">
+</p>
 
-Small Herdr plugin for resizing panes and reshaping tabs without restarting their processes.
+<h1 align="center">herdr-pane-layouts</h1>
+
+<p align="center"><strong>Useful pane layouts. No restarted processes.</strong></p>
 
 ## Actions
 
