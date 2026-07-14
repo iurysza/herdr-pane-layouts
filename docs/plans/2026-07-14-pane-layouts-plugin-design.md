@@ -10,7 +10,7 @@ The `layouts` plugin exposes six actions:
 
 - equalize the current tab into vertical columns;
 - cycle through even vertical, even horizontal, main-left, main-top, and tiled layouts;
-- resize the current pane left, down, up, or right by one percent.
+- resize the current pane left, down, up, or right by two percent.
 
 Smart Rename remains separate because naming and pane geometry have unrelated responsibilities.
 

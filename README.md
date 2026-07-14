@@ -4,7 +4,7 @@
 
 <h1 align="center">herdr-pane-layouts</h1>
 
-<p align="center"><strong>Useful pane layouts. No restarted processes.</strong></p>
+<p align="center"><strong>Seamless tmux-style pane resizing and layouts for Herdr.</strong></p>
 
 ## Actions
 
@@ -12,10 +12,10 @@
 |---|---|
 | `layouts.equalize` | Equal-width vertical columns |
 | `layouts.cycle` | Cycle even vertical, even horizontal, main-left, main-top, and tiled |
-| `layouts.resize-left` | Resize left by 1% |
-| `layouts.resize-down` | Resize down by 1% |
-| `layouts.resize-up` | Resize up by 1% |
-| `layouts.resize-right` | Resize right by 1% |
+| `layouts.resize-left` | Resize left by 2% |
+| `layouts.resize-down` | Resize down by 2% |
+| `layouts.resize-up` | Resize up by 2% |
+| `layouts.resize-right` | Resize right by 2% |
 
 Manual layout changes preserve running processes and scrollback. `equalize` and `cycle` temporarily move panes through a staging tab; if reshaping fails, recovery returns them to the original tab when possible. Zoomed tabs must be unzoomed first.
 

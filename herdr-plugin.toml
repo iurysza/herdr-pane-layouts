@@ -2,7 +2,7 @@ id = "layouts"
 name = "Pane Layouts"
 version = "0.1.0"
 min_herdr_version = "0.7.0"
-description = "Resize, equalize, and cycle layouts without restarting panes."
+description = "Seamless tmux-style pane resizing and layouts for Herdr."
 platforms = ["linux", "macos"]
 
 [[actions]]
@@ -22,27 +22,27 @@ command = ["python3", "src/cli.py", "cycle"]
 [[actions]]
 id = "resize-left"
 title = "Pane Layouts: resize left"
-description = "Resize the current pane left by one percent."
+description = "Resize the current pane left by two percent."
 contexts = ["pane"]
-command = ["herdr", "pane", "resize", "--direction", "left", "--amount", "0.01", "--current"]
+command = ["herdr", "pane", "resize", "--direction", "left", "--amount", "0.02", "--current"]
 
 [[actions]]
 id = "resize-down"
 title = "Pane Layouts: resize down"
-description = "Resize the current pane down by one percent."
+description = "Resize the current pane down by two percent."
 contexts = ["pane"]
-command = ["herdr", "pane", "resize", "--direction", "down", "--amount", "0.01", "--current"]
+command = ["herdr", "pane", "resize", "--direction", "down", "--amount", "0.02", "--current"]
 
 [[actions]]
 id = "resize-up"
 title = "Pane Layouts: resize up"
-description = "Resize the current pane up by one percent."
+description = "Resize the current pane up by two percent."
 contexts = ["pane"]
-command = ["herdr", "pane", "resize", "--direction", "up", "--amount", "0.01", "--current"]
+command = ["herdr", "pane", "resize", "--direction", "up", "--amount", "0.02", "--current"]
 
 [[actions]]
 id = "resize-right"
 title = "Pane Layouts: resize right"
-description = "Resize the current pane right by one percent."
+description = "Resize the current pane right by two percent."
 contexts = ["pane"]
-command = ["herdr", "pane", "resize", "--direction", "right", "--amount", "0.01", "--current"]
+command = ["herdr", "pane", "resize", "--direction", "right", "--amount", "0.02", "--current"]
