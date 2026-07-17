@@ -16,7 +16,7 @@ Smart Rename remains separate because naming and pane geometry have unrelated re
 
 ## Architecture
 
-`herdr-plugin.toml` declares fixed actions. Resize actions call Herdr's CLI directly. Equalize and cycle invoke one Python stdlib script that communicates with Herdr's Unix socket.
+`herdr-plugin.toml` declares fixed actions. Every action invokes one Python stdlib script that communicates with Herdr's Unix socket, avoiding assumptions about the plugin runner's `PATH`.
 
 The layout script preserves running processes by moving non-anchor panes into a temporary staging tab and reinserting them according to a target layout tree. On failure, it attempts to recover staged panes into the original tab. It refuses to reshape zoomed tabs.
 
@@ -29,4 +29,4 @@ The layout script preserves running processes by moving non-anchor panes into a 
 
 ## Testing
 
-Unit tests cover balanced trees, preset uniqueness, insertion order, and single-pane behavior. Python compilation and TOML parsing catch syntax errors. Live verification covers one resize and one reversible layout action.
+Unit tests cover balanced trees, preset uniqueness, insertion order, and single-pane behavior. Python compilation catches syntax errors. Live verification runs all six actions in a disposable workspace and confirms that layout changes preserve pane processes.

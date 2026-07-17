@@ -60,8 +60,11 @@ description = "resize pane left"
 
 ```sh
 python3 -m unittest discover -s test -v
-python3 -m py_compile src/*.py
+python3 -m py_compile src/*.py test/e2e_live.py
+python3 test/e2e_live.py
 ```
+
+The live test must run inside Herdr with the plugin linked. It exercises all six actions in a disposable workspace and verifies that pane processes survive layout changes.
 
 ## Requirements
 

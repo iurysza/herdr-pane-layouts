@@ -17,6 +17,14 @@ from typing import Any, Iterator
 from layouts import Node, first_pane, insertion_plan, pane_ids, presets, same
 
 
+RESIZE_DIRECTIONS = {
+    "resize-left": "left",
+    "resize-down": "down",
+    "resize-up": "up",
+    "resize-right": "right",
+}
+
+
 class HerdrError(RuntimeError):
     pass
 
@@ -189,14 +197,25 @@ def target_for(action: str, layout: dict[str, Any]) -> Node:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("equalize", "cycle"))
+    parser.add_argument(
+        "action", choices=("equalize", "cycle", *RESIZE_DIRECTIONS)
+    )
     args = parser.parse_args()
     herdr = Herdr()
 
     try:
         with herdr.layout_lock():
-            current = herdr.layout()
-            reshape(herdr, current, target_for(args.action, current))
+            if direction := RESIZE_DIRECTIONS.get(args.action):
+                pane_id = os.environ.get("HERDR_PANE_ID")
+                if not pane_id:
+                    raise HerdrError("resize action requires a pane context")
+                herdr.request(
+                    "pane.resize",
+                    {"pane_id": pane_id, "direction": direction, "amount": 0.02},
+                )
+            else:
+                current = herdr.layout()
+                reshape(herdr, current, target_for(args.action, current))
         return 0
     except (HerdrError, OSError, KeyError, ValueError, json.JSONDecodeError) as error:
         print(f"pane-layouts: {error}", file=sys.stderr)
