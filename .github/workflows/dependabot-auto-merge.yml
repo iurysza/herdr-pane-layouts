@@ -1,0 +1,118 @@
+# Squash-merge Dependabot pull requests once every other check is green.
+# Semver-major updates stay open for a human.
+#
+# main has no required status checks, so `gh pr merge --auto` would merge
+# immediately. This job waits, then squash-merges. It does not check out
+# pull request code.
+name: Dependabot auto-merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  checks: read
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Leave semver-major updates for review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: echo "Semver-major update. Leaving this pull request for a human."
+
+      - name: Leave unclassified updates for review
+        if: steps.metadata.outputs.update-type == ''
+        run: echo "Dependabot did not report an update type. Leaving this pull request for a human."
+
+      - name: Squash-merge when checks are green
+        if: steps.metadata.outputs.update-type != '' && steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          # Watch long enough for other checks to register, then until they finish.
+          grace_deadline=$((SECONDS + 120))
+          deadline=$((SECONDS + 1200))
+
+          echo "Update is not semver-major. Waiting for other checks on ${HEAD_SHA}."
+
+          while true; do
+            set +e
+            rows=$(gh pr checks "$PR_NUMBER" \
+              --json name,workflow,bucket \
+              --jq '.[] | select(.workflow != "Dependabot auto-merge") | [.bucket, .name] | @tsv' \
+              2>/tmp/pr-checks.err)
+            status=$?
+            set -e
+
+            if [ "$status" -ne 0 ]; then
+              if grep -q "no checks reported" /tmp/pr-checks.err; then
+                rows=""
+              else
+                cat /tmp/pr-checks.err >&2
+                exit "$status"
+              fi
+            fi
+
+            pending=0
+            failed=0
+            while IFS=$'\t' read -r bucket name; do
+              [ -z "$bucket" ] && continue
+              case "$bucket" in
+                pass|skipping) ;;
+                fail|cancel)
+                  failed=1
+                  echo "Check failed: ${name} (${bucket})"
+                  ;;
+                *)
+                  pending=1
+                  echo "Check pending: ${name} (${bucket})"
+                  ;;
+              esac
+            done <<< "$rows"
+
+            if [ "$failed" -eq 1 ]; then
+              echo "Leaving the pull request open."
+              exit 1
+            fi
+
+            if [ "$SECONDS" -lt "$grace_deadline" ] || [ "$pending" -eq 1 ]; then
+              if [ "$SECONDS" -ge "$deadline" ]; then
+                echo "Checks are still pending. Leaving the pull request open."
+                exit 1
+              fi
+              sleep 20
+              continue
+            fi
+
+            echo "Other checks are green, or none were reported."
+            break
+          done
+
+          view=$(gh pr view "$PR_NUMBER" --json state,headRefOid --jq '[.state, .headRefOid] | @tsv')
+          state="${view%%$'\t'*}"
+          oid="${view#*$'\t'}"
+          if [ "$state" = "MERGED" ]; then
+            echo "Pull request is already merged."
+            exit 0
+          fi
+          if [ "$oid" != "$HEAD_SHA" ]; then
+            echo "Head SHA changed. A newer run owns this pull request."
+            exit 0
+          fi
+
+          gh pr merge "$PR_NUMBER" --squash --match-head-commit "$HEAD_SHA"
