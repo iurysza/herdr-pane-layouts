@@ -20,7 +20,7 @@ python3 -m unittest discover -s test -v
 python3 -m py_compile src/cli.py src/layouts.py
 ```
 
-This repo has no GitHub Actions workflows. Gate before push:
+Dependabot auto-merge is `.github/workflows/dependabot-auto-merge.yml`. It does not run tests. Gate before push:
 
 ```sh
 python3 -m unittest discover -s test -v && python3 -m py_compile src/cli.py src/layouts.py
