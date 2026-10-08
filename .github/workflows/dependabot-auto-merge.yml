@@ -3,7 +3,7 @@
 #
 # main has no required status checks, so `gh pr merge --auto` would merge
 # immediately. This job waits, then squash-merges. It does not check out
-# pull request code.
+# pull request code, so steps that run gh set GH_REPO.
 name: Dependabot auto-merge
 
 on:
@@ -39,6 +39,7 @@ jobs:
         if: steps.metadata.outputs.update-type != '' && steps.metadata.outputs.update-type != 'version-update:semver-major'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
